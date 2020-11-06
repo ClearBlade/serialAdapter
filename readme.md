@@ -13,7 +13,7 @@ The xDot adapter utilizes MQTT messaging to communicate with the ClearBlade Plat
 
 
 ## ClearBlade Platform Dependencies
-The xDot adapter was constructed to provide the ability to communicate with a _System_ defined in a ClearBlade Platform instance. Therefore, the adapter requires a _System_ to have been created within a ClearBlade Platform instance.
+The __serial__ adapter was constructed to provide the ability to communicate with a _System_ defined in a ClearBlade Platform instance. Therefore, the adapter requires a _System_ to have been created within a ClearBlade Platform instance.
 
 Once a System has been created, artifacts must be defined within the ClearBlade Platform system to allow the adapters to function properly. At a minimum: 
 
