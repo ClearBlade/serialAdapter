@@ -186,17 +186,20 @@ func writePort(payload string) {
 	}
 
 	writeToSerialPort(payload)
+	//log.Println("[DEBUG] writePort - No data read from serial port, skipping publish.")
+	//readFromSerialPort()
 }
 
 func readFromSerialPort() {
 	// 1. Read all data from serial port
-	// 2. Publish data to platform as string
+	// 2. Publish data to platform as string TODO: needs to be hex
 	data, err := serialPort.ReadSerialPort()
 
 	if err != nil && err != io.EOF {
 		log.Printf("[ERROR] readFromSerialPort - ERROR reading from serial port: %s\n", err.Error())
 		publishSerialIOError("read", err)
 	} else {
+		log.Printf("[DEBUG] readFromSerialPort - Data returned from serial port: %s\n", data)
 		if data != "" {
 			//If there are any slashes in the data, we need to escape them so duktape
 			//doesn't throw a SyntaxError: unterminated string (line 1) error
@@ -205,7 +208,7 @@ func readFromSerialPort() {
 			log.Printf("[INFO] readFromSerialPort - Data read from serial port: %s\n", data)
 
 			//Publish data to message broker
-			err := publish(topicRoot+"/response", data)
+			err := publish("serialAdapter/response", data)
 			if err != nil {
 				log.Printf("[ERROR] readFromSerialPort - ERROR publishing to topic: %s\n", err.Error())
 			}
@@ -226,6 +229,8 @@ func writeToSerialPort(payload string) {
 		log.Printf("[ERROR] writeToSerialPort - ERROR writing to serial port: %s\n", err.Error())
 		publishSerialIOError("read", err)
 	}
+	//Ryan: Should I read here?
+
 	return
 }
 

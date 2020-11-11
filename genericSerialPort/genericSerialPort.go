@@ -1,6 +1,7 @@
 package genericserialport
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -45,11 +46,13 @@ func createOptionsFromAdapterConfig(adapterSettings map[string]interface{}) seri
 	if adapterSettings["bitRate"] == nil {
 		panic("createOptionsFromAdapterConfig - Cannot create serial port. bitRate (Baud rate) not specified.")
 	} else {
-		bitRate, err := adapterSettings["bitRate"].(json.Number).Int64()
-		if err != nil {
-			panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing bitRate: %w", err))
-		}
-		switch int(bitRate) {
+		// bitRate, err := adapterSettings["bitRate"].(json.Number).Int64()
+		// if err != nil {
+		// 	panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing bitRate: %w", err))
+		// }
+		// switch int(bitRate) {
+		var bitRate = 19200
+		switch bitRate {
 		case 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000:
 			portOptions.BitRate = int(bitRate)
 			log.Println("[DEBUG] createOptionsFromAdapterConfig - bitRate applied")
@@ -100,11 +103,13 @@ func createOptionsFromAdapterConfig(adapterSettings map[string]interface{}) seri
 	//DTR
 	log.Println("[DEBUG] createOptionsFromAdapterConfig - Applying dataTerminalReady")
 	if adapterSettings["dataTerminalReady"] != nil {
-		dataTerminalReady, err := adapterSettings["dataTerminalReady"].(json.Number).Int64()
-		if err != nil {
-			panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing dataTerminalReady: %w", err))
-		}
-		if int(dataTerminalReady) > 0 {
+		// dataTerminalReady, err := adapterSettings["dataTerminalReady"].(json.Number).Int64()
+		// if err != nil {
+		// 	panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing dataTerminalReady: %w", err))
+		// }
+		// if int(dataTerminalReady) > 0 {
+		var dataTerminalReady = 2
+		if dataTerminalReady > 0 {
 			switch int(dataTerminalReady) {
 			case 1, 2, 3:
 				portOptions.DTR = int(dataTerminalReady)
@@ -136,11 +141,13 @@ func createOptionsFromAdapterConfig(adapterSettings map[string]interface{}) seri
 	//flow control
 	log.Println("[DEBUG] createOptionsFromAdapterConfig - Applying flowControl")
 	if adapterSettings["flowControl"] != nil {
-		flowControl, err := adapterSettings["flowControl"].(json.Number).Int64()
-		if err != nil {
-			panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing flowControl: %w", err))
-		}
-		if int(flowControl) > 0 {
+		// flowControl, err := adapterSettings["flowControl"].(json.Number).Int64()
+		// if err != nil {
+		// 	panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing flowControl: %w", err))
+		// }
+		// if int(flowControl) > 0 {
+		var flowControl = 0
+		if flowControl > 0 {
 			switch int(flowControl) {
 			case 1, 2, 3, 4:
 				portOptions.FlowControl = int(flowControl)
@@ -170,11 +177,13 @@ func createOptionsFromAdapterConfig(adapterSettings map[string]interface{}) seri
 	//RTS
 	log.Println("[DEBUG] createOptionsFromAdapterConfig - Applying requestToSend")
 	if adapterSettings["requestToSend"] != nil {
-		requestToSend, err := adapterSettings["requestToSend"].(json.Number).Int64()
-		if err != nil {
-			panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing requestToSend: %w", err))
-		}
-		if int(requestToSend) > 0 {
+		// requestToSend, err := adapterSettings["requestToSend"].(json.Number).Int64()
+		// if err != nil {
+		// 	panic(fmt.Errorf("createOptionsFromAdapterConfig - Error parsing requestToSend: %w", err))
+		// }
+		// if int(requestToSend) > 0 {
+		var requestToSend = 2
+		if requestToSend > 0 {
 			switch int(requestToSend) {
 			case 1, 2, 3:
 				portOptions.RTS = int(requestToSend)
@@ -226,11 +235,13 @@ func CreateSerialPort(adapterSettings map[string]interface{}) *SerialPort {
 
 	if adapterSettings["xONxOFF"] != nil {
 		log.Println("[DEBUG] CreateSerialPort - xONxOFF specified. Applying xONxOFF to serial port")
-		xONxOFF, err := adapterSettings["xONxOFF"].(json.Number).Int64()
-		if err != nil {
-			panic(fmt.Errorf("CreateSerialPort - Error parsing xONxOFF: %w", err))
-		}
-		if int(xONxOFF) > 0 {
+		// xONxOFF, err := adapterSettings["xONxOFF"].(json.Number).Int64()
+		// if err != nil {
+		// 	panic(fmt.Errorf("CreateSerialPort - Error parsing xONxOFF: %w", err))
+		// }
+		// if int(xONxOFF) > 0 {
+		var xONxOFF = 0
+		if xONxOFF > 0 {
 			switch int(xONxOFF) {
 			case 1, 2, 3, 4:
 				err = thePort.port.SetXonXoff(int(xONxOFF))
@@ -287,7 +298,8 @@ func (serialDevice *SerialPort) ReadSerialPort() (string, error) {
 	var n int
 	var err error
 
-	buf := make([]byte, 128)
+	//buf := make([]byte, 128)
+	buf := make([]byte, 2048)
 	incomingData := ""
 
 	for {
@@ -295,15 +307,20 @@ func (serialDevice *SerialPort) ReadSerialPort() (string, error) {
 		if err != nil { // err will equal io.EOF if there is no data to read
 			break
 		}
-		log.Println("[DEBUG] readSerialPort - Data read: " + string(buf))
+		//log.Printf("[DEBUG] readSerialPort - Data read: " + string(buf))
+		log.Printf("[DEBUG] readSerialPort - Hex Data read: %x\n", buf)
 		log.Printf("[DEBUG] readSerialPort - Number of bytes read: %d\n", n)
 		if n > 0 {
-			incomingData += string(buf[:n])
+			//incomingData += string(buf[:n])
 		}
+		incomingData = hex.EncodeToString(buf)
+		log.Println("[DEBUG] readSerialPort - Hex converted to string " + incomingData)
 	}
 
 	if n > 0 {
-		incomingData += string(buf[:n])
+		//incomingData += string(buf[:n])
+		incomingData = hex.EncodeToString(buf)
+		log.Println("[DEBUG] readSerialPort - Hex converted to string 2 " + incomingData)
 	}
 
 	log.Println("[DEBUG] readSerialPort - Done reading")
@@ -319,7 +336,15 @@ func (serialDevice *SerialPort) ReadSerialPort() (string, error) {
 
 //WriteSerialPort :
 func (serialDevice *SerialPort) WriteSerialPort(data string) error {
-	n, err := serialDevice.port.Write([]byte(data))
+	//convert to Hex
+	decoded, err := hex.DecodeString(data)
+	if err != nil {
+		log.Printf("[ERROR] WriteSerialPort - ERROR converting string to hex: %s\n", err.Error())
+	} else {
+		log.Printf("[DEBUG] WriteSerialPort - String converted to hex is: %x\n", decoded)
+	}
+	n, err := serialDevice.port.Write(decoded)
+	//n, err := serialDevice.port.Write([]byte(decoded))
 	if err != nil {
 		log.Printf("[ERROR] WriteSerialPort - ERROR writing to serial port: %s\n", err.Error())
 		return err
